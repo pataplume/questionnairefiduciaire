@@ -1,0 +1,995 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ZARYA · Étude besoins fiduciaires · Condere</title>
+<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+<style>
+  :root {
+    --bg: #fafaf7;
+    --surface: #ffffff;
+    --surface-2: #f4f3ee;
+    --text: #1a1a1a;
+    --text-secondary: #5f5e5a;
+    --text-tertiary: #8e8d87;
+    --border: rgba(0,0,0,0.08);
+    --border-strong: rgba(0,0,0,0.15);
+    --accent: #1a1a1a;
+    --accent-soft: #e6f1fb;
+    --accent-text: #0c447c;
+    --success: #1D9E75;
+    --info-bg: #e6f1fb;
+    --info-border: #b5d4f4;
+    --info-text: #0c447c;
+    --radius-sm: 6px;
+    --radius-md: 8px;
+    --radius-lg: 12px;
+    --font-sans: -apple-system, BlinkMacSystemFont, "Inter", "Helvetica Neue", Helvetica, Arial, sans-serif;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; background: var(--bg); color: var(--text); font-family: var(--font-sans); font-size: 15px; line-height: 1.6; -webkit-font-smoothing: antialiased; }
+  body { padding: 2rem 1rem 4rem; }
+  .shell { max-width: 720px; margin: 0 auto; }
+  .brand { display: flex; align-items: center; gap: 12px; margin-bottom: 2rem; padding-bottom: 1.5rem; border-bottom: 1px solid var(--border); }
+  .brand-mark { width: 32px; height: 32px; border-radius: 8px; background: var(--text); color: var(--surface); display: flex; align-items: center; justify-content: center; font-weight: 500; font-size: 14px; letter-spacing: 0.5px; }
+  .brand-title { font-weight: 500; font-size: 15px; color: var(--text); }
+  .brand-sub { font-size: 12px; color: var(--text-tertiary); letter-spacing: 0.3px; }
+  .progress-wrap { margin-bottom: 2rem; }
+  .progress-track { height: 3px; background: var(--surface-2); border-radius: 2px; overflow: hidden; }
+  .progress-fill { height: 100%; background: var(--accent); transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1); width: 0%; }
+  .progress-meta { display: flex; justify-content: space-between; align-items: center; font-size: 12px; color: var(--text-tertiary); margin-top: 10px; }
+  .save-status { font-size: 11px; font-style: italic; display: flex; align-items: center; gap: 6px; }
+  .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--success); }
+  .section-title { font-size: 22px; font-weight: 500; margin: 0 0 6px; letter-spacing: -0.3px; }
+  .section-sub { font-size: 14px; color: var(--text-secondary); margin: 0 0 2rem; }
+  .q { margin-bottom: 1.75rem; padding-bottom: 1.5rem; border-bottom: 1px solid var(--border); }
+  .q:last-of-type { border-bottom: none; }
+  .label { font-size: 14px; font-weight: 500; display: block; margin-bottom: 10px; line-height: 1.5; color: var(--text); }
+  .hint { font-size: 12px; color: var(--text-tertiary); margin: -4px 0 10px; line-height: 1.5; }
+  .input, .textarea, .select { width: 100%; font-family: inherit; font-size: 14px; color: var(--text); background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-md); padding: 10px 12px; transition: border-color 0.15s, box-shadow 0.15s; -webkit-appearance: none; appearance: none; }
+  .textarea { min-height: 90px; resize: vertical; line-height: 1.6; font-family: inherit; }
+  .input:focus, .textarea:focus, .select:focus { outline: none; border-color: var(--border-strong); box-shadow: 0 0 0 3px var(--surface-2); }
+  .input::placeholder, .textarea::placeholder { color: var(--text-tertiary); }
+  .pills { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 4px; }
+  .pill { font-family: inherit; font-size: 13px; padding: 7px 13px; border: 1px solid var(--border); border-radius: 20px; background: var(--surface); color: var(--text); cursor: pointer; transition: all 0.15s; line-height: 1.3; }
+  .pill:hover { border-color: var(--border-strong); background: var(--surface-2); }
+  .pill[aria-pressed="true"] { background: var(--accent-soft); border-color: var(--info-border); color: var(--accent-text); }
+  .other-input { margin-top: 10px; display: none; }
+  .other-input.show { display: block; }
+  .row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .row-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; }
+  @media (max-width: 540px) { .row, .row-3 { grid-template-columns: 1fr; } }
+  .slider-row { display: flex; align-items: center; gap: 12px; }
+  .slider-row input[type="range"], .repartition-slider, .auto-slider-row input[type="range"] {
+    flex: 1; -webkit-appearance: none; appearance: none;
+    height: 4px; background: var(--surface-2); border-radius: 2px; outline: none; width: 100%;
+  }
+  input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none; appearance: none;
+    width: 20px; height: 20px; border-radius: 50%;
+    background: var(--accent); cursor: pointer; border: 2px solid var(--surface);
+    box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+  }
+  input[type="range"]::-moz-range-thumb {
+    width: 20px; height: 20px; border-radius: 50%;
+    background: var(--accent); cursor: pointer; border: 2px solid var(--surface);
+  }
+  .slider-out { font-size: 13px; font-weight: 500; min-width: 48px; text-align: right; color: var(--text); }
+  .repartition-wrap { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-md); padding: 14px 16px; }
+  .repartition-labels { display: flex; justify-content: space-between; margin-bottom: 10px; font-size: 12px; color: var(--text-tertiary); }
+  .repartition-values { display: flex; justify-content: space-between; align-items: baseline; margin-top: 12px; font-size: 14px; }
+  .repartition-values .pct { font-weight: 500; font-size: 20px; color: var(--accent-text); }
+  .repartition-slider { margin: 0; }
+  .auto-row { margin-bottom: 1.25rem; padding-bottom: 1.25rem; border-bottom: 1px solid var(--border); }
+  .auto-row:last-child { border-bottom: none; }
+  .auto-task-label { font-size: 13px; font-weight: 500; margin-bottom: 10px; }
+  .auto-slider-row { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-md); padding: 12px 14px; }
+  .auto-slider-row .labels-row { display: flex; justify-content: space-between; font-size: 10px; color: var(--text-tertiary); margin-bottom: 8px; line-height: 1.3; }
+  .auto-current { text-align: center; margin-top: 8px; font-size: 12px; color: var(--accent-text); font-weight: 500; min-height: 16px; }
+  .stars { display: flex; gap: 4px; margin-top: 6px; }
+  .star { cursor: pointer; color: var(--text-tertiary); font-size: 22px; background: none; border: none; padding: 2px 4px; line-height: 1; transition: color 0.1s; }
+  .star.active { color: #d4a017; }
+  .rank-list { display: flex; flex-direction: column; gap: 8px; }
+  .rank-card { display: flex; align-items: center; gap: 12px; padding: 12px 14px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-md); cursor: move; transition: all 0.15s; user-select: none; }
+  .rank-card:hover { border-color: var(--border-strong); background: var(--surface-2); }
+  .rank-card.dragging { opacity: 0.4; transform: scale(0.98); }
+  .rank-num { font-weight: 500; color: var(--accent-text); background: var(--accent-soft); min-width: 26px; height: 26px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; flex-shrink: 0; }
+  .rank-card .card-name { flex: 1; font-size: 13px; font-weight: 500; }
+  .rank-card .card-pct { display: flex; align-items: center; gap: 8px; }
+  .rank-card .card-pct input { width: 60px; text-align: right; font-size: 12px; padding: 6px 8px; border: 1px solid var(--border); border-radius: 6px; background: var(--bg); font-family: inherit; }
+  .rank-card .card-pct input:focus { outline: none; border-color: var(--border-strong); }
+  .rank-card .handle { color: var(--text-tertiary); font-size: 14px; cursor: grab; }
+  .rank-card .handle:active { cursor: grabbing; }
+  .prio-rank-list { display: flex; flex-direction: column; gap: 6px; }
+  .prio-rank-item { display: flex; align-items: center; gap: 12px; padding: 10px 14px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-md); cursor: move; font-size: 13px; transition: all 0.15s; user-select: none; }
+  .prio-rank-item:hover { border-color: var(--border-strong); background: var(--surface-2); }
+  .prio-rank-item.dragging { opacity: 0.4; transform: scale(0.98); }
+  .prio-rank-num { font-weight: 500; color: var(--text-tertiary); min-width: 22px; font-size: 12px; }
+  .prio-rank-handle { margin-left: auto; color: var(--text-tertiary); font-size: 16px; line-height: 1; }
+  .branch { margin-top: 14px; padding: 14px 16px; background: var(--info-bg); border-radius: var(--radius-md); border-left: 3px solid var(--info-border); }
+  .branch-label { font-size: 11px; color: var(--info-text); font-weight: 500; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 10px; }
+  .branch .label { margin-bottom: 6px; }
+  .nav { display: flex; justify-content: space-between; align-items: center; margin-top: 2.5rem; padding-top: 1.5rem; border-top: 1px solid var(--border); gap: 12px; flex-wrap: wrap; }
+  .btn { font-family: inherit; font-size: 13px; padding: 9px 16px; border: 1px solid var(--border); border-radius: var(--radius-md); background: var(--surface); color: var(--text); cursor: pointer; transition: all 0.15s; display: inline-flex; align-items: center; gap: 6px; line-height: 1; }
+  .btn:hover:not(:disabled) { border-color: var(--border-strong); background: var(--surface-2); }
+  .btn:disabled { opacity: 0.35; cursor: not-allowed; }
+  .btn-primary { background: var(--accent); color: var(--surface); border-color: var(--accent); }
+  .btn-primary:hover:not(:disabled) { background: #333; border-color: #333; }
+  .nav-actions { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+  .toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(20px); background: var(--accent); color: var(--surface); padding: 12px 20px; border-radius: var(--radius-md); font-size: 13px; box-shadow: 0 4px 20px rgba(0,0,0,0.15); opacity: 0; transition: all 0.3s; pointer-events: none; z-index: 100; }
+  .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+  .complete-screen { text-align: center; padding: 3rem 1rem; }
+  .complete-icon { width: 64px; height: 64px; border-radius: 50%; background: var(--accent-soft); color: var(--accent-text); display: inline-flex; align-items: center; justify-content: center; font-size: 32px; margin-bottom: 1.5rem; }
+  .complete-title { font-size: 24px; font-weight: 500; margin: 0 0 12px; }
+  .complete-text { font-size: 15px; color: var(--text-secondary); margin: 0 0 2rem; max-width: 460px; margin-left: auto; margin-right: auto; }
+  .arrow { display: inline-block; width: 1em; line-height: 1; }
+</style>
+</head>
+<body>
+<div class="shell">
+  <div class="brand">
+    <div class="brand-mark">C</div>
+    <div>
+      <div class="brand-title">ZARYA · Étude besoins fiduciaires</div>
+      <div class="brand-sub">Condere · Recherche utilisateur</div>
+    </div>
+  </div>
+  <div class="progress-wrap">
+    <div class="progress-track"><div class="progress-fill" id="progress"></div></div>
+    <div class="progress-meta">
+      <span id="section-indicator">Section 1 sur 12</span>
+      <span class="save-status" id="save-status"><span class="dot"></span> Sauvegarde auto activée</span>
+    </div>
+  </div>
+  <div id="content"></div>
+  <div class="nav">
+    <button class="btn" id="prev-btn"><span class="arrow">←</span> Précédent</button>
+    <div class="nav-actions">
+      <button class="btn" id="reset-btn" title="Effacer toutes les réponses">↻ Reset</button>
+      <button class="btn" id="export-btn">↓ Exporter .md</button>
+      <button class="btn btn-primary" id="next-btn">Suivant <span class="arrow">→</span></button>
+    </div>
+  </div>
+</div>
+<div class="toast" id="toast"></div>
+<script>
+(function(){
+  var STORAGE_KEY = 'zarya_questionnaire_v2';
+  var state = { answers:{}, currentSection:0, meta:{ startedAt:null } };
+
+  function loadState(){
+    try { var raw = localStorage.getItem(STORAGE_KEY); if (raw) { state = Object.assign(state, JSON.parse(raw)); } } catch(e) {}
+    if (!state.meta.startedAt) state.meta.startedAt = new Date().toISOString();
+  }
+  var saveTimer = null;
+  function saveState(){
+    clearTimeout(saveTimer);
+    saveTimer = setTimeout(function(){
+      try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); flashSave(); } catch(e) {}
+    }, 300);
+  }
+  function flashSave(){
+    var el = document.getElementById('save-status'); if (!el) return;
+    el.innerHTML = '<span class="dot"></span> Sauvegardé';
+    setTimeout(function(){ el.innerHTML = '<span class="dot"></span> Sauvegarde auto activée'; }, 1500);
+  }
+  function get(key, def){ return state.answers[key] !== undefined ? state.answers[key] : def; }
+  function set(key, val){ state.answers[key] = val; saveState(); }
+  function showToast(msg){
+    var t = document.getElementById('toast'); t.textContent = msg; t.classList.add('show');
+    setTimeout(function(){ t.classList.remove('show'); }, 3000);
+  }
+
+  function pillsHTML(name, options, multi, hasOther){
+    var html = '<div class="pills" data-pills="'+name+'" data-multi="'+(multi?'true':'false')+'"'+(hasOther?' data-has-other="true"':'')+'>';
+    options.forEach(function(v){ html += '<button class="pill" data-v="'+v+'">'+v+'</button>'; });
+    html += '</div>';
+    if (hasOther) {
+      html += '<input type="text" class="input other-input" data-other-for="'+name+'" data-k="'+name+'_other" placeholder="Précisez...">';
+    }
+    return html;
+  }
+
+  var sections = [
+    {
+      id:'meta',
+      title:'Informations de séance',
+      sub:'Quelques infos pour contextualiser vos réponses.',
+      render: function(){ return ''+
+        '<div class="q"><label class="label">Nom du cabinet</label><input type="text" class="input" data-k="meta_cabinet" placeholder="Ex. Fiduciaire Dupont SA"></div>'+
+        '<div class="q"><label class="label">Personne interrogée (nom + fonction)</label><input type="text" class="input" data-k="meta_person" placeholder="Ex. Marie Durand, Associée"></div>'+
+        '<div class="q"><label class="label">Date de réponse</label><input type="date" class="input" data-k="meta_date"></div>'+
+        '<div class="q"><label class="label">Email de contact (pour le suivi)</label><input type="email" class="input" data-k="meta_email" placeholder="contact@cabinet.ch"></div>';
+      }
+    },
+    {
+      id:'contexte',
+      title:'1 · Contexte du cabinet',
+      sub:'Quelques chiffres pour situer votre fiduciaire.',
+      render: function(){ return ''+
+        '<div class="q"><label class="label">Nombre de collaborateur·rices</label><input type="number" class="input" data-k="ctx_collaborators" placeholder="Ex. 8" min="1"></div>'+
+        '<div class="q"><label class="label">Année de création du cabinet</label><input type="number" class="input" data-k="ctx_founded" placeholder="Ex. 2012" min="1900" max="2030"></div>'+
+        '<div class="q"><label class="label">Chiffre d\'affaires annuel approximatif</label>'+
+          pillsHTML('ctx_revenue', ['< 500k CHF','500k – 1M','1M – 3M','> 3M','Préfère ne pas dire'], false, false)+
+        '</div>'+
+        '<div class="q"><label class="label">Répartition de votre clientèle</label>'+
+          '<p class="hint">Faites glisser pour ajuster la proportion entre entreprises et personnes privées.</p>'+
+          '<div class="repartition-wrap">'+
+            '<div class="repartition-labels"><span>← plus d\'entreprises</span><span>plus de privés →</span></div>'+
+            '<input type="range" class="repartition-slider" min="0" max="100" step="5" data-k="ctx_repartition" data-repartition="true">'+
+            '<div class="repartition-values">'+
+              '<div><div class="pct" id="rep-left">50%</div><div style="font-size:12px;color:var(--text-tertiary)">Entreprises</div></div>'+
+              '<div style="text-align:right"><div class="pct" id="rep-right">50%</div><div style="font-size:12px;color:var(--text-tertiary)">Personnes privées</div></div>'+
+            '</div>'+
+          '</div>'+
+        '</div>'+
+        '<div class="q"><label class="label">Parmi les entreprises, % en gestion complète</label>'+
+          '<p class="hint">Gestion complète = compta + fiscalité + salaires + TVA (tout chez vous).</p>'+
+          '<div class="slider-row"><input type="range" min="0" max="100" step="5" data-k="ctx_pct_fullservice" data-out="ctx_pct_fullservice_out"><span class="slider-out" id="ctx_pct_fullservice_out">0%</span></div>'+
+        '</div>'+
+        '<div class="q"><label class="label">Types de clients dominants</label>'+
+          pillsHTML('ctx_client_types', ['PME','Indépendant·es','Associations','Personnes privées fortunées','Startups','Autre'], true, true)+
+        '</div>'+
+        '<div class="q"><label class="label">Volumes mensuels approximatifs</label>'+
+          '<div class="row">'+
+            '<div><p class="hint" style="margin-bottom:4px">Dossiers actifs</p><input type="number" class="input" data-k="ctx_vol_files" placeholder="Ex. 80"></div>'+
+            '<div><p class="hint" style="margin-bottom:4px">Factures / mois</p><input type="number" class="input" data-k="ctx_vol_invoices" placeholder="Ex. 400"></div>'+
+          '</div>'+
+        '</div>';
+      }
+    },
+    {
+      id:'outils',
+      title:'2 · Outils actuels',
+      sub:'Votre stack logicielle existante.',
+      render: function(){ return ''+
+        '<div class="q"><label class="label">Logiciel comptable principal</label>'+
+          pillsHTML('tools_accounting', ['Bexio','Crésus','Abacus','Winbiz','Sage','Banana','Autre'], false, true)+
+          '<p class="hint" style="margin-top:10px">Satisfaction (1 = nul, 5 = excellent)</p>'+
+          '<div class="stars" data-stars="tools_accounting_rating">'+[1,2,3,4,5].map(function(i){ return '<button class="star" data-n="'+i+'">★</button>'; }).join('')+'</div>'+
+        '</div>'+
+        '<div class="q"><label class="label">Outil de gestion interne / ERP</label>'+
+          pillsHTML('tools_erp', ['Bexio','Odoo','SAP','Excel uniquement','Aucun','Autre'], false, true)+
+        '</div>'+
+        '<div class="q"><label class="label">CRM / outil de prospection</label>'+
+          pillsHTML('tools_crm', ['Odoo','HubSpot','Salesforce','Monday','Pipedrive','Excel','Aucun','Autre'], false, true)+
+        '</div>'+
+        '<div class="q"><label class="label">Stockage des documents</label>'+
+          pillsHTML('tools_storage', ['SharePoint / OneDrive','Google Drive','NAS local','kDrive (Infomaniak)','Disque local','Dropbox','Autre'], true, true)+
+        '</div>'+
+        '<div class="q"><label class="label">Email professionnel</label>'+
+          pillsHTML('tools_email', ['Outlook / Microsoft 365','Gmail / Google Workspace','Autre'], false, true)+
+        '</div>'+
+        '<div class="q"><label class="label">Y a-t-il un outil que vous détestez mais ne pouvez pas remplacer ?</label>'+
+          '<p class="hint">Lequel, et pourquoi vous ne pouvez pas le quitter ?</p>'+
+          '<textarea class="textarea" data-k="tools_hated" placeholder="Ex. On reste sur Crésus car nos clients impriment encore leurs justificatifs..."></textarea>'+
+        '</div>'+
+        '<div class="q"><label class="label">Avez-vous déjà testé un outil IA (ChatGPT, Copilot, Claude) dans votre travail ?</label>'+
+          pillsHTML('tools_ai_tested', ['Oui, régulièrement','Oui, ponctuellement','Testé puis abandonné','Non, jamais'], false, false)+
+          '<div class="branch" data-show-if="tools_ai_tested" data-show-values=\'["Oui, régulièrement","Oui, ponctuellement","Testé puis abandonné"]\'>'+
+            '<div class="branch-label">→ Question liée</div>'+
+            '<label class="label">Pour quoi faire ? Qu\'en avez-vous retiré (positif/négatif) ?</label>'+
+            '<textarea class="textarea" data-k="tools_ai_experience" placeholder="Ex. Utilisé pour résumer des PV, gain de temps mais peur de la confidentialité."></textarea>'+
+          '</div>'+
+          '<div class="branch" data-show-if="tools_ai_tested" data-show-values=\'["Non, jamais"]\'>'+
+            '<div class="branch-label">→ Question liée</div>'+
+            '<label class="label">Qu\'est-ce qui vous freine ?</label>'+
+            '<textarea class="textarea" data-k="tools_ai_blockers" placeholder="Confidentialité, manque de temps, pas convaincu·e, autre..."></textarea>'+
+          '</div>'+
+        '</div>'+
+        '<div class="q"><label class="label">Budget logiciel mensuel du cabinet (ordre de grandeur)</label>'+
+          pillsHTML('tools_budget', ['< 200 CHF','200 – 500 CHF','500 – 1500 CHF','1500 – 5000 CHF','> 5000 CHF','Ne sait pas'], false, false)+
+        '</div>';
+      }
+    },
+    {
+      id:'workflow',
+      title:'3 · Workflow d\'un dossier type',
+      sub:'Racontez votre quotidien.',
+      render: function(){ return ''+
+        '<div class="q"><label class="label">Décrivez étape par étape le traitement d\'un dossier client type sur un mois</label>'+
+          '<p class="hint">Du moment où un document arrive jusqu\'à ce que tout soit traité. N\'omettez aucune étape.</p>'+
+          '<textarea class="textarea" data-k="wf_description" placeholder="Étape 1 : Le client envoie ses factures par email..." style="min-height:150px"></textarea>'+
+        '</div>'+
+        '<div class="q"><label class="label">Où perdez-vous le plus de temps ?</label>'+
+          '<textarea class="textarea" data-k="wf_timeloss" placeholder="Ex. Renommer et classer les pièces qui arrivent par mail, surtout en fin de mois."></textarea>'+
+        '</div>'+
+        '<div class="q"><label class="label">Où observez-vous le plus d\'erreurs ?</label>'+
+          '<textarea class="textarea" data-k="wf_errors" placeholder="Ex. Saisie manuelle des montants TVA, surtout sur factures multi-taux."></textarea>'+
+        '</div>'+
+        '<div class="q"><label class="label">Quelle étape vous épuise mentalement même si elle est rapide ?</label>'+
+          '<textarea class="textarea" data-k="wf_mental" placeholder="Ex. Relancer pour la dixième fois la même personne pour son relevé bancaire."></textarea>'+
+        '</div>'+
+        '<div class="q"><label class="label">Si vous pouviez supprimer UNE seule étape demain, laquelle ?</label>'+
+          '<textarea class="textarea" data-k="wf_remove" placeholder="Une réponse claire vaut mieux qu\'une longue liste."></textarea>'+
+        '</div>';
+      }
+    },
+    {
+      id:'documents',
+      title:'4 · Gestion documentaire',
+      sub:'Comment circulent vos documents.',
+      render: function(){
+        var canaux = ['Email','Portail client','Papier / scan','Dépôt direct (clé USB, en main)'];
+        return ''+
+        '<div class="q"><label class="label">Canaux de réception des documents</label>'+
+          '<p class="hint">Faites glisser pour classer du plus utilisé (en haut) au moins utilisé. Indiquez le % approximatif à droite.</p>'+
+          '<div class="rank-list" id="canaux-list" data-rank="doc_canaux_order">'+
+            canaux.map(function(c,i){
+              return '<div class="rank-card" draggable="true" data-rank-v="'+c+'">'+
+                '<span class="rank-num">'+(i+1)+'</span>'+
+                '<span class="card-name">'+c+'</span>'+
+                '<div class="card-pct"><input type="number" min="0" max="100" placeholder="%" data-pct-for="'+c+'"><span class="handle">⋮⋮</span></div>'+
+              '</div>';
+            }).join('')+
+          '</div>'+
+        '</div>'+
+        '<div class="q"><label class="label">Logique de classement actuelle</label>'+
+          pillsHTML('doc_classification', ['Par client','Par année','Par type (facture, banque, salaire...)','Par mois','Par projet','Anarchique','Autre'], true, true)+
+        '</div>'+
+        '<div class="q"><label class="label">Qui classe ?</label>'+
+          pillsHTML('doc_who', ['Chaque collaborateur·rice pour ses dossiers','Une personne dédiée (assistant·e, secrétaire)','Le client lui-même','Mix selon le client'], false, false)+
+        '</div>'+
+        '<div class="q"><label class="label">Temps consacré au classement des dossiers par semaine</label>'+
+          '<p class="hint">Pour tout le cabinet, à la louche.</p>'+
+          pillsHTML('doc_time_filing', ['< 2h','2-5h','5-10h','10-20h','> 20h','Ne sait pas'], false, false)+
+        '</div>'+
+        '<div class="q"><label class="label">Quand vous cherchez un document de 2023, en combien de temps le retrouvez-vous en moyenne ?</label>'+
+          pillsHTML('doc_search_time', ['< 30s','1-2 min','2-5 min','5-15 min','> 15 min','Parfois jamais'], false, false)+
+        '</div>'+
+        '<div class="q"><label class="label">Quelles informations recopiez-vous manuellement des documents vers votre logiciel ?</label>'+
+          '<textarea class="textarea" data-k="doc_manual_extract" placeholder="Ex. IBAN, montant TTC, date d\'échéance, n° de référence QR..."></textarea>'+
+        '</div>'+
+        '<div class="q"><label class="label">Sur 100 documents traités, combien nécessitent une correction ?</label>'+
+          '<div class="slider-row"><input type="range" min="0" max="100" step="5" data-k="doc_error_rate" data-out="doc_error_rate_out"><span class="slider-out" id="doc_error_rate_out">0%</span></div>'+
+        '</div>'+
+        '<div class="q"><label class="label">Si un assistant parfait s\'occupait de vos documents entrants : que ferait-il à votre place, et que voudriez-vous absolument continuer à faire vous-même ?</label>'+
+          '<textarea class="textarea" data-k="doc_dream" placeholder="Soyez concret·e." style="min-height:110px"></textarea>'+
+        '</div>';
+      }
+    },
+    {
+      id:'echeances',
+      title:'5 · Échéances et relances',
+      sub:'Comment vous suivez les deadlines et relancez vos clients.',
+      render: function(){ return ''+
+        '<div class="q"><label class="label">Comment suivez-vous les deadlines aujourd\'hui ?</label>'+
+          pillsHTML('dl_tracking', ['Calendrier Outlook / Google','Excel / Google Sheets','Logiciel dédié','Mémoire / Post-it','Notion / Asana / autre','Autre'], true, true)+
+        '</div>'+
+        '<div class="q"><label class="label">Qui est responsable du suivi ?</label>'+
+          pillsHTML('dl_responsible', ['Une personne dédiée','Chacun·e pour ses propres dossiers','Mix selon le type d\'échéance'], false, false)+
+          '<div class="branch" data-show-if="dl_responsible" data-show-values=\'["Mix selon le type d\\u0027échéance"]\'>'+
+            '<div class="branch-label">→ Détaillez</div>'+
+            '<label class="label">Comment se répartit le suivi selon les types d\'échéance ?</label>'+
+            '<textarea class="textarea" data-k="dl_responsible_detail" placeholder="Ex. La compta tient les échéances TVA, l\'assistante gère les rappels documents."></textarea>'+
+          '</div>'+
+        '</div>'+
+        '<div class="q"><label class="label">Avez-vous raté une échéance dans les 12 derniers mois ?</label>'+
+          pillsHTML('dl_missed', ['Oui, une seule fois','Oui, plusieurs fois','Non, jamais','Préfère ne pas dire'], false, false)+
+          '<div class="branch" data-show-if="dl_missed" data-show-values=\'["Oui, une seule fois","Oui, plusieurs fois"]\'>'+
+            '<div class="branch-label">→ Question liée</div>'+
+            '<label class="label">Que s\'est-il passé concrètement ?</label>'+
+            '<textarea class="textarea" data-k="dl_missed_detail" placeholder="Quel type d\'échéance, quelle conséquence ?"></textarea>'+
+          '</div>'+
+        '</div>'+
+        '<div class="q"><label class="label">Comment relancez-vous aujourd\'hui ?</label>'+
+          pillsHTML('dl_relance_how', ['Email manuel','Téléphone','Email automatique via outil','Courrier','WhatsApp / SMS','Autre'], true, true)+
+        '</div>'+
+        '<div class="q"><label class="label">Temps consacré aux relances par semaine (pour tout le cabinet)</label>'+
+          pillsHTML('dl_relance_time', ['< 2h','2-5h','5-10h','10-20h','> 20h','Ne sait pas'], false, false)+
+        '</div>'+
+        '<div class="q"><label class="label">Quel % de vos clients sont "compliqués" (relances multiples nécessaires) ?</label>'+
+          '<div class="slider-row"><input type="range" min="0" max="100" step="5" data-k="dl_difficult_pct" data-out="dl_difficult_pct_out"><span class="slider-out" id="dl_difficult_pct_out">0%</span></div>'+
+        '</div>'+
+        '<div class="q"><label class="label">Avez-vous un template de relance ou refaites-vous l\'email à chaque fois ?</label>'+
+          pillsHTML('dl_template', ['J\'ai un template figé','J\'ai un template que j\'adapte','Je refais à chaque fois'], false, false)+
+        '</div>';
+      }
+    },
+    {
+      id:'factures',
+      title:'6 · Saisie des factures',
+      sub:'Votre process facture, du document au logiciel comptable.',
+      render: function(){ return ''+
+        '<div class="q"><label class="label">Volume de factures traitées par mois</label><input type="number" class="input" data-k="inv_volume" placeholder="Ex. 400"></div>'+
+        '<div class="q"><label class="label">Comment saisissez-vous une facture aujourd\'hui, étape par étape ?</label>'+
+          '<textarea class="textarea" data-k="inv_process" placeholder="Ex. Je reçois le PDF, je lis le QR, je tape les infos dans Bexio..."></textarea>'+
+        '</div>'+
+        '<div class="q"><label class="label">Utilisez-vous un OCR ?</label>'+
+          '<p class="hint">OCR = logiciel qui lit automatiquement le texte d\'un PDF ou d\'une image scannée (ex. extraction des données d\'une facture sans recopie manuelle).</p>'+
+          pillsHTML('inv_ocr', ['Oui','Non, mais j\'ai testé','Non, jamais testé'], false, false)+
+          '<div class="branch" data-show-if="inv_ocr" data-show-values=\'["Oui"]\'>'+
+            '<div class="branch-label">→ Approfondissement</div>'+
+            '<label class="label">Lequel ? Et qu\'est-ce qui ne va pas / pourrait être mieux ?</label>'+
+            '<textarea class="textarea" data-k="inv_ocr_which" placeholder="Outil utilisé + frustrations actuelles"></textarea>'+
+          '</div>'+
+          '<div class="branch" data-show-if="inv_ocr" data-show-values=\'["Non, mais j\\u0027ai testé"]\'>'+
+            '<div class="branch-label">→ Approfondissement</div>'+
+            '<label class="label">Pourquoi avoir abandonné ?</label>'+
+            '<textarea class="textarea" data-k="inv_ocr_abandoned" placeholder="Trop d\'erreurs, trop cher, trop lent, mauvaise intégration..."></textarea>'+
+          '</div>'+
+        '</div>'+
+        '<div class="q"><label class="label">Quels champs sont les plus pénibles à saisir ?</label>'+
+          pillsHTML('inv_painful_fields', ['IBAN','TVA (taux multiples)','Dates','Référence QR / BVR','Montants devises étrangères','Fournisseur (création nouveau)','Catégorisation comptable','Autre'], true, true)+
+        '</div>'+
+        '<div class="q"><label class="label">Quels champs sont les plus critiques (où une erreur coûte cher) ?</label>'+
+          '<textarea class="textarea" data-k="inv_critical_fields" placeholder="Ex. IBAN pour les paiements, TVA pour le décompte..."></textarea>'+
+        '</div>'+
+        '<div class="q"><label class="label">Temps moyen pour traiter une facture, du PDF au logiciel</label>'+
+          pillsHTML('inv_time', ['< 1 min','1-3 min','3-5 min','5-10 min','> 10 min'], false, false)+
+        '</div>'+
+        '<div class="q"><label class="label">Une fois traitée, où va la facture ?</label>'+
+          pillsHTML('inv_destination', ['Logiciel compta direct','Dossier client (NAS / cloud)','Export CSV pour autre outil','Préparation paiement bancaire','Archivage physique','Autre'], true, true)+
+        '</div>'+
+        '<div class="q"><label class="label">Pour un outil qui extrairait automatiquement les données de vos factures (montants, IBAN, TVA, fournisseur, dates...), comment préféreriez-vous l\'intégrer ?</label>'+
+          pillsHTML('inv_integration_pref', ['Un fichier CSV à importer manuellement dans mon logiciel comptable','Un connecteur natif qui pousse directement dans mon logiciel','Une connexion technique (API) gérée par mon prestataire IT','Peu importe, du moment que ça marche'], false, false)+
+        '</div>';
+      }
+    },
+    {
+      id:'salaires',
+      title:'6 bis · Salaires',
+      sub:'Section conditionnelle : approfondie uniquement si vous gérez des salaires.',
+      render: function(){ return ''+
+        '<div class="q"><label class="label">Gérez-vous les salaires pour vos clients ?</label>'+
+          pillsHTML('sal_active', ['Oui, pour beaucoup','Oui, quelques-uns (< 5)','Non'], false, false)+
+        '</div>'+
+        '<div class="branch" data-show-if="sal_active" data-show-values=\'["Oui, pour beaucoup","Oui, quelques-uns (< 5)"]\' style="background:transparent;border-left:none;padding:0;margin-top:0">'+
+          '<div class="q"><label class="label">Pour combien de clients gérez-vous les salaires ?</label><input type="number" class="input" data-k="sal_clients" placeholder="Ex. 15"></div>'+
+          '<div class="q"><label class="label">Comment obtenez-vous les variables mensuelles (heures, absences, primes) ?</label>'+
+            '<p class="hint">Le canal et le format de transmission des données par votre client.</p>'+
+            '<textarea class="textarea" data-k="sal_collect" placeholder="Email, tableau Excel, formulaire papier, appel téléphonique..."></textarea>'+
+          '</div>'+
+          '<div class="q"><label class="label">Combien de temps pour collecter toutes les infos chaque mois ?</label>'+
+            pillsHTML('sal_collect_time', ['< 2h','2-5h','5-10h','10-20h','> 20h'], false, false)+
+          '</div>'+
+          '<div class="q"><label class="label">Comment le client valide-t-il les fiches de salaire avant traitement définitif ?</label>'+
+            '<p class="hint">Une fois les bulletins préparés, par quel canal le client confirme-t-il que tout est correct ?</p>'+
+            pillsHTML('sal_validation', ['Email de confirmation','Signature physique','Validation téléphonique','Outil dédié','Pas de validation formelle','Autre'], true, true)+
+          '</div>'+
+          '<div class="q"><label class="label">Qu\'est-ce qui retarde le plus le process salaire chaque mois ?</label>'+
+            '<textarea class="textarea" data-k="sal_blockers" placeholder="Ex. Les clients qui répondent en retard avec les heures supplémentaires."></textarea>'+
+          '</div>'+
+        '</div>';
+      }
+    },
+    {
+      id:'acquisition',
+      title:'7 · Acquisition et prospection',
+      sub:'Côté commercial du cabinet.',
+      render: function(){ return ''+
+        '<div class="q"><label class="label">Comment trouvez-vous de nouveaux clients ?</label>'+
+          pillsHTML('acq_channels', ['Réseau / bouche-à-oreille','Apporteurs (avocats, banquiers...)','Démarchage actif','Site web / SEO','Réseaux sociaux (LinkedIn)','Publicité','Aucun effort actif','Autre'], true, true)+
+        '</div>'+
+        '<div class="q"><label class="label">Nouveaux clients par an (ordre de grandeur)</label>'+
+          pillsHTML('acq_new_per_year', ['< 5','5-15','15-30','30-50','> 50'], false, false)+
+        '</div>'+
+        '<div class="q"><label class="label">Qui s\'occupe du commercial dans le cabinet ?</label>'+
+          '<input type="text" class="input" data-k="acq_who" placeholder="Ex. Moi (associé·e), à temps partiel">'+
+        '</div>'+
+        '<div class="q"><label class="label">Comment gérez-vous votre pipeline prospect ?</label>'+
+          pillsHTML('acq_pipeline', ['CRM dédié','Excel / tableau','Email + mémoire','Rien de structuré'], false, false)+
+        '</div>'+
+        '<div class="q"><label class="label">Perdez-vous des prospects par manque de suivi ?</label>'+
+          pillsHTML('acq_lost', ['Souvent','Parfois','Rarement','Jamais'], false, false)+
+        '</div>'+
+        '<div class="q"><label class="label">Quel aspect de votre activité commerciale aimeriez-vous transformer ou automatiser en priorité ?</label>'+
+          '<p class="hint">Pensez aux tâches qui vous coûtent du temps ou que vous repoussez régulièrement.</p>'+
+          '<textarea class="textarea" data-k="acq_magic_wand" placeholder="Sans contrainte technique ou budgétaire."></textarea>'+
+        '</div>';
+      }
+    },
+    {
+      id:'timesheet',
+      title:'8 · Temps passé et facturation interne',
+      sub:'Court mais important pour comprendre votre modèle économique.',
+      render: function(){ return ''+
+        '<div class="q"><label class="label">Comment suivez-vous le temps passé par dossier ?</label>'+
+          pillsHTML('ts_tracking', ['Outil dédié (Toggl, Harvest...)','Module dans logiciel compta','Excel','Estimation de mémoire','Pas de suivi'], false, false)+
+        '</div>'+
+        '<div class="q"><label class="label">Modèle de facturation</label>'+
+          pillsHTML('ts_billing', ['Forfait','À l\'heure','Tranches de 15 min','Tranches de 30 min','Mix selon mandat','Autre'], false, true)+
+        '</div>'+
+        '<div class="q"><label class="label">Quel pourcentage de votre temps de travail réel n\'est pas refacturé au client ?</label>'+
+          '<p class="hint">Le temps passé sur un dossier que vous ne facturez finalement pas — c\'est de la valeur perdue.</p>'+
+          '<div class="slider-row"><input type="range" min="0" max="50" step="5" data-k="ts_unbilled_pct" data-out="ts_unbilled_pct_out"><span class="slider-out" id="ts_unbilled_pct_out">0%</span></div>'+
+        '</div>';
+      }
+    },
+    {
+      id:'ia_vision',
+      title:'9 · Vision d\'une IA idéale',
+      sub:'Section projective : pas de bonne réponse.',
+      render: function(){
+        var tasks = [
+          ['ai_lvl_classify','Classer un document entrant'],
+          ['ai_lvl_rename','Renommer un fichier'],
+          ['ai_lvl_extract','Extraire les données d\'une facture'],
+          ['ai_lvl_relance','Envoyer un email de relance client'],
+          ['ai_lvl_tva','Préparer une déclaration TVA'],
+          ['ai_lvl_reply','Répondre à une question simple d\'un client']
+        ];
+        return ''+
+        '<div class="q"><label class="label">Lundi matin, vous arrivez au cabinet et un assistant a travaillé tout le week-end. Idéalement, qu\'a-t-il préparé ?</label>'+
+          '<textarea class="textarea" data-k="ai_morning" placeholder="Description libre, soyez concret·e." style="min-height:130px"></textarea>'+
+        '</div>'+
+        '<div class="q"><label class="label">Niveau d\'autonomie acceptable par tâche</label>'+
+          '<p class="hint">Faites glisser pour chaque tâche entre supervision totale (à gauche) et autonomie totale (à droite).</p>'+
+          '<div style="margin-top:14px">'+
+            tasks.map(function(t){
+              return '<div class="auto-row">'+
+                '<div class="auto-task-label">'+t[1]+'</div>'+
+                '<div class="auto-slider-row">'+
+                  '<div class="labels-row"><span>Supervision totale<br>(je valide tout)</span><span>Autonomie totale<br>(l\'IA agit seule)</span></div>'+
+                  '<input type="range" min="0" max="100" step="5" data-k="'+t[0]+'" data-auto-slider="'+t[0]+'_label">'+
+                  '<div class="auto-current" id="'+t[0]+'_label">—</div>'+
+                '</div>'+
+              '</div>';
+            }).join('')+
+          '</div>'+
+        '</div>'+
+        '<div class="q"><label class="label">Tâches que vous ne déléguerez JAMAIS à une IA, par principe</label>'+
+          '<textarea class="textarea" data-k="ai_never" placeholder="Soyez précis·e et expliquez pourquoi."></textarea>'+
+        '</div>';
+      }
+    },
+    {
+      id:'priorisation',
+      title:'10 · Priorisation et closing',
+      sub:'Vos arbitrages et votre vision budgétaire.',
+      render: function(){
+        var items = ['Classement et recherche de documents','Saisie des factures','Relances et échéances','CRM et acquisition','Validation des salaires','Suivi du temps et facturation interne'];
+        return ''+
+        '<div class="q"><label class="label">Classez ces problèmes par ordre de douleur (faites glisser, 1 = pire)</label>'+
+          '<div class="prio-rank-list" id="prio-rank-list">'+
+            items.map(function(v,i){
+              return '<div class="prio-rank-item" draggable="true" data-rank-v="'+v+'">'+
+                '<span class="prio-rank-num">'+(i+1)+'</span><span>'+v+'</span><span class="prio-rank-handle">⋮⋮</span>'+
+              '</div>';
+            }).join('')+
+          '</div>'+
+        '</div>'+
+        '<div class="q"><label class="label">Si je vous proposais aujourd\'hui un outil de gestion complet qui résout l\'ensemble de ces douleurs, combien seriez-vous prêt·e à payer par mois et par utilisateur ?</label>'+
+          '<p class="hint">CHF / mois / utilisateur. Ordre de grandeur, pas un engagement.</p>'+
+          '<input type="number" class="input" data-k="prio_willingness_pay" placeholder="Ex. CHF 800.-" min="0" style="max-width:180px">'+
+        '</div>'+
+        '<div class="q"><label class="label">Qui prend la décision d\'acheter un nouveau logiciel dans votre cabinet ?</label>'+
+          '<input type="text" class="input" data-k="prio_decision_maker" placeholder="Ex. Les deux associé·es ensemble">'+
+        '</div>'+
+        '<div class="q"><label class="label">Quand vous avez abandonné un outil par le passé, c\'était à cause de quoi ?</label>'+
+          '<textarea class="textarea" data-k="prio_churn_reason" placeholder="Ex. Trop complexe, intégration ratée, support absent..."></textarea>'+
+        '</div>'+
+        '<div class="q"><label class="label">Une dernière chose que vous voudriez nous dire et que nous n\'avons pas demandée ?</label>'+
+          '<textarea class="textarea" data-k="prio_anything_else" placeholder="Carte blanche." style="min-height:110px"></textarea>'+
+        '</div>'+
+        '<div class="complete-screen" style="display:none" id="complete-screen">'+
+          '<div class="complete-icon">✓</div>'+
+          '<h3 class="complete-title">Questionnaire complet</h3>'+
+          '<p class="complete-text">Merci beaucoup pour votre temps, nous reviendrons vers vous rapidement.</p>'+
+        '</div>';
+      }
+    }
+  ];
+
+  function renderSection(){
+    var s = sections[state.currentSection];
+    document.getElementById('content').innerHTML = '<h2 class="section-title">'+s.title+'</h2><p class="section-sub">'+s.sub+'</p>'+s.render();
+    document.getElementById('section-indicator').textContent = 'Section '+(state.currentSection+1)+' sur '+sections.length;
+    document.getElementById('progress').style.width = Math.round(((state.currentSection+1)/sections.length)*100)+'%';
+    document.getElementById('prev-btn').disabled = state.currentSection === 0;
+    var nextBtn = document.getElementById('next-btn');
+    nextBtn.innerHTML = (state.currentSection === sections.length-1) ? 'Terminer ✓' : 'Suivant <span class="arrow">→</span>';
+    nextBtn.disabled = false;
+    hydrate();
+    window.scrollTo({top:0, behavior:'smooth'});
+  }
+
+  function autonomyLabel(v){
+    var n = parseInt(v);
+    if (isNaN(n)) return '—';
+    if (n <= 15) return 'Supervision totale · IA suggère, je valide tout';
+    if (n <= 40) return 'Supervision forte · IA agit sur quelques cas faciles';
+    if (n <= 60) return 'Équilibre · IA agit, je valide les cas complexes';
+    if (n <= 85) return 'Autonomie forte · IA agit, je vérifie les exceptions';
+    return 'Autonomie totale · IA agit seule';
+  }
+
+  function hydrate(){
+    document.querySelectorAll('[data-k]').forEach(function(el){
+      var k = el.dataset.k;
+      var v = get(k, '');
+
+      if (el.dataset.repartition === 'true') {
+        el.value = (v === '' || v == null) ? 50 : v;
+        var left = document.getElementById('rep-left');
+        var right = document.getElementById('rep-right');
+        var update = function(val){ var p = parseInt(val); if (left) left.textContent = p + '%'; if (right) right.textContent = (100-p) + '%'; };
+        update(el.value);
+        el.addEventListener('input', function(e){ set(k, parseInt(e.target.value)); update(e.target.value); });
+        return;
+      }
+
+      if (el.dataset.autoSlider) {
+        el.value = (v === '' || v == null) ? 50 : v;
+        var labelEl = document.getElementById(el.dataset.autoSlider);
+        var updateAuto = function(val){
+          if (val === '' || val == null) { if (labelEl) labelEl.textContent = '—'; return; }
+          if (labelEl) labelEl.innerHTML = '<strong>'+val+'%</strong> · '+autonomyLabel(val);
+        };
+        if (v !== '' && v != null) updateAuto(el.value);
+        el.addEventListener('input', function(e){ set(k, parseInt(e.target.value)); updateAuto(e.target.value); });
+        return;
+      }
+
+      if (el.type === 'range') {
+        el.value = v || 0;
+        var out = document.getElementById(el.dataset.out);
+        if (out) out.textContent = (v || 0) + '%';
+        el.addEventListener('input', function(e){ set(k, parseInt(e.target.value)); if (out) out.textContent = e.target.value + '%'; });
+      } else {
+        el.value = v;
+        el.addEventListener('input', function(e){ set(k, e.target.value); });
+      }
+    });
+
+    document.querySelectorAll('[data-pills]').forEach(function(group){
+      var k = group.dataset.pills;
+      var multi = group.dataset.multi === 'true';
+      var current = get(k, multi ? [] : null);
+      group.querySelectorAll('.pill').forEach(function(btn){
+        var v = btn.dataset.v;
+        var isActive = multi ? (Array.isArray(current) && current.indexOf(v) !== -1) : (current === v);
+        btn.setAttribute('aria-pressed', isActive ? 'true' : 'false');
+        btn.addEventListener('click', function(){
+          if (multi) {
+            var cur = get(k, []);
+            if (!Array.isArray(cur)) cur = [];
+            if (cur.indexOf(v) !== -1) cur = cur.filter(function(x){ return x !== v; });
+            else cur = cur.concat([v]);
+            set(k, cur);
+          } else {
+            var cur2 = get(k, null);
+            set(k, cur2 === v ? null : v);
+          }
+          updateBranching();
+          updateOtherInputs();
+          hydratePills();
+        });
+      });
+    });
+
+    updateOtherInputs();
+
+    document.querySelectorAll('[data-pct-for]').forEach(function(input){
+      var canal = input.dataset.pctFor;
+      var stored = get('doc_canaux_pct', {});
+      if (stored && stored[canal] !== undefined) input.value = stored[canal];
+      input.addEventListener('input', function(e){
+        var current = get('doc_canaux_pct', {});
+        current[canal] = e.target.value;
+        set('doc_canaux_pct', current);
+      });
+    });
+
+    document.querySelectorAll('[data-stars]').forEach(function(group){
+      var k = group.dataset.stars;
+      var current = get(k, 0);
+      group.querySelectorAll('.star').forEach(function(btn){
+        var n = parseInt(btn.dataset.n);
+        btn.classList.toggle('active', n <= current);
+        btn.addEventListener('click', function(){
+          set(k, n);
+          group.querySelectorAll('.star').forEach(function(b){ b.classList.toggle('active', parseInt(b.dataset.n) <= n); });
+        });
+      });
+    });
+
+    var canauxList = document.getElementById('canaux-list');
+    if (canauxList) {
+      var savedOrder = get('doc_canaux_order', null);
+      if (savedOrder && Array.isArray(savedOrder)) {
+        var items = Array.from(canauxList.children);
+        var map = {};
+        items.forEach(function(it){ map[it.dataset.rankV] = it; });
+        canauxList.innerHTML = '';
+        savedOrder.forEach(function(v){ if (map[v]) canauxList.appendChild(map[v]); });
+        items.forEach(function(it){ if (savedOrder.indexOf(it.dataset.rankV) === -1) canauxList.appendChild(it); });
+        renumberCanaux();
+      }
+      setupDragAndDrop(canauxList, function(){
+        var order = Array.from(canauxList.children).map(function(it){ return it.dataset.rankV; });
+        set('doc_canaux_order', order);
+        renumberCanaux();
+      });
+    }
+
+    var prioList = document.getElementById('prio-rank-list');
+    if (prioList) {
+      var savedPrio = get('prio_ranking', null);
+      if (savedPrio && Array.isArray(savedPrio)) {
+        var pItems = Array.from(prioList.children);
+        var pMap = {};
+        pItems.forEach(function(it){ pMap[it.dataset.rankV] = it; });
+        prioList.innerHTML = '';
+        savedPrio.forEach(function(v){ if (pMap[v]) prioList.appendChild(pMap[v]); });
+        pItems.forEach(function(it){ if (savedPrio.indexOf(it.dataset.rankV) === -1) prioList.appendChild(it); });
+        renumberPrio();
+      }
+      setupDragAndDrop(prioList, function(){
+        var order = Array.from(prioList.children).map(function(it){ return it.dataset.rankV; });
+        set('prio_ranking', order);
+        renumberPrio();
+      });
+    }
+
+    updateBranching();
+  }
+
+  function setupDragAndDrop(list, onChange){
+    var dragged = null;
+    list.querySelectorAll('[draggable="true"]').forEach(function(item){
+      item.addEventListener('dragstart', function(e){ dragged = item; item.classList.add('dragging'); e.dataTransfer.effectAllowed = 'move'; });
+      item.addEventListener('dragend', function(){ item.classList.remove('dragging'); dragged = null; if (onChange) onChange(); });
+      item.addEventListener('dragover', function(e){
+        e.preventDefault();
+        if (!dragged || dragged === item) return;
+        var rect = item.getBoundingClientRect();
+        var after = (e.clientY - rect.top) > rect.height/2;
+        list.insertBefore(dragged, after ? item.nextSibling : item);
+        if (onChange) onChange();
+      });
+    });
+  }
+
+  function renumberCanaux(){
+    var list = document.getElementById('canaux-list'); if (!list) return;
+    Array.from(list.children).forEach(function(it, i){
+      var num = it.querySelector('.rank-num'); if (num) num.textContent = i+1;
+    });
+  }
+  function renumberPrio(){
+    var list = document.getElementById('prio-rank-list'); if (!list) return;
+    Array.from(list.children).forEach(function(it, i){
+      var num = it.querySelector('.prio-rank-num'); if (num) num.textContent = i+1;
+    });
+  }
+
+  function hydratePills(){
+    document.querySelectorAll('[data-pills]').forEach(function(group){
+      var k = group.dataset.pills;
+      var multi = group.dataset.multi === 'true';
+      var current = get(k, multi ? [] : null);
+      group.querySelectorAll('.pill').forEach(function(btn){
+        var v = btn.dataset.v;
+        var isActive = multi ? (Array.isArray(current) && current.indexOf(v) !== -1) : (current === v);
+        btn.setAttribute('aria-pressed', isActive ? 'true' : 'false');
+      });
+    });
+  }
+
+  function updateOtherInputs(){
+    document.querySelectorAll('[data-other-for]').forEach(function(input){
+      var k = input.dataset.otherFor;
+      var current = get(k, null);
+      var hasAutre = Array.isArray(current) ? (current.indexOf('Autre') !== -1) : (current === 'Autre');
+      input.classList.toggle('show', hasAutre);
+    });
+  }
+
+  function updateBranching(){
+    document.querySelectorAll('[data-show-if]').forEach(function(branch){
+      var k = branch.dataset.showIf;
+      var expected;
+      try { expected = JSON.parse(branch.dataset.showValues); } catch(e) { expected = []; }
+      var current = get(k);
+      var matches = Array.isArray(current) ? current.some(function(v){ return expected.indexOf(v) !== -1; }) : (expected.indexOf(current) !== -1);
+      branch.style.display = matches ? '' : 'none';
+    });
+  }
+
+  function generateMarkdown(){
+    var a = state.answers;
+    var dateStr = a.meta_date || new Date().toISOString().slice(0,10);
+    var cabinet = a.meta_cabinet || 'Cabinet non renseigné';
+    var person = a.meta_person || 'Personne non renseignée';
+    var duration = a.meta_duration || '—';
+
+    function v(k, def){ if (def === undefined) def = '—'; var x = a[k]; if (x === undefined || x === null || x === '') return def; if (Array.isArray(x)) return x.length ? x.join(', ') : def; return x; }
+    function pct(k){ var x = a[k]; return (x === undefined || x === null || x === '') ? '—' : x + '%'; }
+    function withOther(k){
+      var main = v(k);
+      var other = a[k + '_other'];
+      if (other && (main === 'Autre' || (Array.isArray(a[k]) && a[k].indexOf('Autre') !== -1))) return main + ' (' + other + ')';
+      return main;
+    }
+    function autoStr(k){ var x = a[k]; if (x === undefined || x === null || x === '') return '—'; return x + '% — ' + autonomyLabel(x); }
+
+    var rep = a.ctx_repartition;
+    var repStr = (rep === undefined || rep === null || rep === '') ? '—' : (rep + '% entreprises / ' + (100-rep) + '% privés');
+
+    var canauxOrder = a.doc_canaux_order || [];
+    var canauxPct = a.doc_canaux_pct || {};
+    var canauxStr = canauxOrder.length
+      ? canauxOrder.map(function(c, i){ var p = canauxPct[c]; return (i+1) + '. ' + c + (p ? ' ('+p+'%)' : ''); }).join('\n')
+      : '—';
+
+    var md = '---\n';
+    md += 'type: interview-fiduciaire\n';
+    md += 'cabinet: "'+cabinet+'"\n';
+    md += 'personne: "'+person+'"\n';
+    md += 'date: '+dateStr+'\n';
+    md += 'email_contact: '+(a.meta_email || '—')+'\n';
+    md += 'debut_session: '+state.meta.startedAt+'\n';
+    md += 'generated: '+new Date().toISOString()+'\n';
+    md += '---\n\n';
+    md += '# Entretien — '+cabinet+'\n\n';
+    md += '> **'+person+'** · '+dateStr+' · contact : '+(a.meta_email || '—')+'\n\n---\n\n';
+
+    md += '## 1 · Contexte du cabinet\n\n';
+    md += '- **Collaborateur·rices** : '+v('ctx_collaborators')+'\n';
+    md += '- **Année de création** : '+v('ctx_founded')+'\n';
+    md += '- **CA annuel** : '+v('ctx_revenue')+'\n';
+    md += '- **Répartition clientèle** : '+repStr+'\n';
+    md += '- **Gestion complète parmi les entreprises** : '+pct('ctx_pct_fullservice')+'\n';
+    md += '- **Types de clients dominants** : '+withOther('ctx_client_types')+'\n';
+    md += '- **Volumes mensuels** : '+v('ctx_vol_files')+' dossiers actifs · '+v('ctx_vol_invoices')+' factures\n\n';
+
+    md += '## 2 · Outils actuels\n\n';
+    md += '- **Comptabilité** : '+withOther('tools_accounting')+' — satisfaction '+v('tools_accounting_rating')+'/5\n';
+    md += '- **ERP / gestion interne** : '+withOther('tools_erp')+'\n';
+    md += '- **CRM** : '+withOther('tools_crm')+'\n';
+    md += '- **Stockage documents** : '+withOther('tools_storage')+'\n';
+    md += '- **Email** : '+withOther('tools_email')+'\n';
+    md += '- **Budget logiciel mensuel** : '+v('tools_budget')+'\n\n';
+    md += '**Outil détesté mais incontournable** :\n'+v('tools_hated')+'\n\n';
+    md += '**Expérience IA antérieure** : '+v('tools_ai_tested')+'\n';
+    if (a.tools_ai_experience) md += '> '+a.tools_ai_experience+'\n';
+    if (a.tools_ai_blockers) md += '**Freins** : '+a.tools_ai_blockers+'\n';
+    md += '\n';
+
+    md += "## 3 · Workflow d'un dossier type\n\n";
+    md += '**Description du process** :\n'+v('wf_description')+'\n\n';
+    md += '**Où le temps se perd** :\n'+v('wf_timeloss')+'\n\n';
+    md += '**Où les erreurs apparaissent** :\n'+v('wf_errors')+'\n\n';
+    md += '**Charge mentale** :\n'+v('wf_mental')+'\n\n';
+    md += '**Étape à supprimer demain** :\n'+v('wf_remove')+'\n\n';
+
+    md += '## 4 · Gestion documentaire\n\n';
+    md += '**Canaux de réception (du plus utilisé au moins utilisé)** :\n'+canauxStr+'\n\n';
+    md += '- **Logique de classement** : '+withOther('doc_classification')+'\n';
+    md += '- **Qui classe** : '+v('doc_who')+'\n';
+    md += '- **Temps classement / semaine** : '+v('doc_time_filing')+'\n';
+    md += '- **Temps moyen pour retrouver un doc 2023** : '+v('doc_search_time')+'\n';
+    md += '- **Taux de correction estimé** : '+pct('doc_error_rate')+'\n\n';
+    md += '**Informations recopiées manuellement** :\n'+v('doc_manual_extract')+'\n\n';
+    md += '**Vision assistant parfait sur documents** :\n'+v('doc_dream')+'\n\n';
+
+    md += '## 5 · Échéances et relances\n\n';
+    md += '- **Outils de suivi** : '+withOther('dl_tracking')+'\n';
+    md += '- **Responsable** : '+v('dl_responsible')+'\n';
+    if (a.dl_responsible_detail) md += '> '+a.dl_responsible_detail+'\n';
+    md += '- **Échéance ratée 12 derniers mois** : '+v('dl_missed')+'\n';
+    if (a.dl_missed_detail) md += '> '+a.dl_missed_detail+'\n';
+    md += '- **Canaux de relance** : '+withOther('dl_relance_how')+'\n';
+    md += '- **Temps relances / semaine** : '+v('dl_relance_time')+'\n';
+    md += '- **% clients "compliqués"** : '+pct('dl_difficult_pct')+'\n';
+    md += '- **Templates** : '+v('dl_template')+'\n\n';
+
+    md += '## 6 · Saisie des factures\n\n';
+    md += '- **Volume mensuel** : '+v('inv_volume')+'\n';
+    md += '- **Usage OCR** : '+v('inv_ocr')+'\n';
+    if (a.inv_ocr_which) md += '> OCR utilisé : '+a.inv_ocr_which+'\n';
+    if (a.inv_ocr_abandoned) md += "> Raison d'abandon : "+a.inv_ocr_abandoned+'\n';
+    md += '- **Champs pénibles** : '+withOther('inv_painful_fields')+'\n';
+    md += '- **Temps par facture** : '+v('inv_time')+'\n';
+    md += '- **Destination après traitement** : '+withOther('inv_destination')+'\n';
+    md += "- **Préférence d'intégration** : "+v('inv_integration_pref')+'\n\n';
+    md += '**Process actuel détaillé** :\n'+v('inv_process')+'\n\n';
+    md += '**Champs critiques** :\n'+v('inv_critical_fields')+'\n\n';
+
+    md += '## 6 bis · Salaires\n\n';
+    md += '- **Gestion salaire** : '+v('sal_active')+'\n';
+    if (a.sal_active && a.sal_active !== 'Non') {
+      md += '- **Nombre de clients salaires** : '+v('sal_clients')+'\n';
+      md += '- **Temps de collecte / mois** : '+v('sal_collect_time')+'\n';
+      md += '- **Mode de validation client** : '+withOther('sal_validation')+'\n\n';
+      md += '**Mode de collecte des variables** :\n'+v('sal_collect')+'\n\n';
+      md += '**Blocages mensuels** :\n'+v('sal_blockers')+'\n\n';
+    } else { md += '\n'; }
+
+    md += '## 7 · Acquisition et prospection\n\n';
+    md += "- **Canaux d'acquisition** : "+withOther('acq_channels')+'\n';
+    md += '- **Nouveaux clients / an** : '+v('acq_new_per_year')+'\n';
+    md += '- **Responsable commercial** : '+v('acq_who')+'\n';
+    md += '- **Gestion pipeline** : '+v('acq_pipeline')+'\n';
+    md += '- **Prospects perdus par manque de suivi** : '+v('acq_lost')+'\n\n';
+    md += '**Aspect commercial à transformer en priorité** :\n'+v('acq_magic_wand')+'\n\n';
+
+    md += '## 8 · Temps passé et facturation interne\n\n';
+    md += '- **Suivi du temps** : '+v('ts_tracking')+'\n';
+    md += '- **Modèle de facturation** : '+withOther('ts_billing')+'\n';
+    md += '- **% temps non refacturé (perte)** : '+pct('ts_unbilled_pct')+'\n\n';
+
+    md += "## 9 · Vision d'une IA idéale\n\n";
+    md += '**Lundi matin idéal** :\n'+v('ai_morning')+'\n\n';
+    md += "**Niveaux d'autonomie acceptés par tâche** :\n";
+    md += '- Classer un document entrant : '+autoStr('ai_lvl_classify')+'\n';
+    md += '- Renommer un fichier : '+autoStr('ai_lvl_rename')+'\n';
+    md += "- Extraire les données d'une facture : "+autoStr('ai_lvl_extract')+'\n';
+    md += '- Envoyer un email de relance : '+autoStr('ai_lvl_relance')+'\n';
+    md += '- Préparer une déclaration TVA : '+autoStr('ai_lvl_tva')+'\n';
+    md += "- Répondre à une question simple d'un client : "+autoStr('ai_lvl_reply')+'\n\n';
+    md += '**Tâches jamais déléguables à une IA** :\n'+v('ai_never')+'\n\n';
+
+    md += '## 10 · Priorisation et closing\n\n';
+    md += '**Classement des problèmes (1 = pire douleur)** :\n';
+    md += ((a.prio_ranking || ['—']).map(function(x,i){ return (i+1)+'. '+x; }).join('\n')) + '\n\n';
+    md += '- **Willingness to pay (outil complet)** : '+(a.prio_willingness_pay ? a.prio_willingness_pay + ' CHF / mois / utilisateur' : '—')+'\n';
+    md += "- **Décideur d'achat** : "+v('prio_decision_maker')+'\n\n';
+    md += "**Raisons d'abandon d'outils passés** :\n"+v('prio_churn_reason')+'\n\n';
+    md += '**Dernière chose à dire** :\n'+v('prio_anything_else')+'\n\n';
+    md += '---\n\n*Document généré automatiquement par le questionnaire ZARYA · Condere*\n';
+    return md;
+  }
+
+  function downloadMarkdown(){
+    var md = generateMarkdown();
+    var cabinet = (state.answers.meta_cabinet || 'cabinet').toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'');
+    var date = (state.answers.meta_date || new Date().toISOString().slice(0,10));
+    var filename = 'zarya-entretien-'+cabinet+'-'+date+'.md';
+    var blob = new Blob([md], {type:'text/markdown;charset=utf-8'});
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement('a');
+    a.href = url; a.download = filename;
+    document.body.appendChild(a); a.click(); document.body.removeChild(a);
+    setTimeout(function(){ URL.revokeObjectURL(url); }, 100);
+    showToast('Téléchargé : '+filename);
+  }
+
+  // EmailJS — service_id: service_onzjy2f | public_key: cDWKkM2G5KEYI8xO7
+  // Template à créer sur emailjs.com :
+  //   To      : tristan@condere.ch ; leana.king@condere.ch
+  //   Subject : [ZARYA] {{cabinet}} — {{person}}
+  //   Body    : {{content}}
+  // Remplacer template_ma0wpy9 ci-dessous par l'ID du template créé.
+  emailjs.init('cDWKkM2G5KEYI8xO7');
+
+  loadState();
+  renderSection();
+
+  document.getElementById('prev-btn').addEventListener('click', function(){
+    if (state.currentSection > 0) { state.currentSection--; saveState(); renderSection(); }
+  });
+  document.getElementById('next-btn').addEventListener('click', function(){
+    if (state.currentSection < sections.length-1) { state.currentSection++; saveState(); renderSection(); }
+    else {
+      emailjs.send('service_onzjy2f', 'template_ma0wpy9', {
+        cabinet: state.answers.meta_cabinet || 'Cabinet non renseigné',
+        person:  state.answers.meta_person  || '—',
+        date:    state.answers.meta_date    || new Date().toISOString().slice(0,10),
+        content: generateMarkdown()
+      }).then(function(){
+        showToast('Questionnaire envoyé à l\'équipe Condere ✓');
+      }, function(err){
+        console.error('EmailJS error:', err);
+        showToast('Envoi échoué — exportez le .md et renvoyez-le manuellement');
+      });
+      showToast('Envoi en cours…');
+      var complete = document.getElementById('complete-screen');
+      if (complete) { complete.style.display = 'block'; complete.scrollIntoView({behavior:'smooth'}); }
+    }
+  });
+  document.getElementById('export-btn').addEventListener('click', downloadMarkdown);
+  document.getElementById('reset-btn').addEventListener('click', function(){
+    if (confirm('Effacer toutes les réponses ? Cette action est irréversible.')) {
+      try { localStorage.removeItem(STORAGE_KEY); } catch(e) {}
+      state = { answers:{}, currentSection:0, meta:{ startedAt:new Date().toISOString() } };
+      renderSection();
+      showToast('Toutes les réponses effacées');
+    }
+  });
+})();
+</script>
+</body>
+</html>
