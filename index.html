@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>ZARYA · Étude besoins fiduciaires · Condere</title>
 <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.2/Sortable.min.js"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600&family=Lexend:wght@300;400;500&display=swap" rel="stylesheet">
@@ -425,9 +426,7 @@
         '<div class="q"><label class="label">Une fois traitée, où va la facture ?</label>'+
           pillsHTML('inv_destination', ['Logiciel compta direct','Dossier client (NAS / cloud)','Export CSV pour autre outil','Préparation paiement bancaire','Archivage physique','Autre'], true, true)+
         '</div>'+
-        '<div class="q"><label class="label">Pour un outil qui extrairait automatiquement les données de vos factures (montants, IBAN, TVA, fournisseur, dates...), comment préféreriez-vous l\'intégrer ?</label>'+
-          pillsHTML('inv_integration_pref', ['Un fichier CSV à importer manuellement dans mon logiciel comptable','Un connecteur natif qui pousse directement dans mon logiciel','Une connexion technique (API) gérée par mon prestataire IT','Peu importe, du moment que ça marche'], false, false)+
-        '</div>';
+        '';
       }
     },
     {
@@ -490,6 +489,11 @@
       render: function(){ return ''+
         '<div class="q"><label class="label">Comment suivez-vous le temps passé par dossier ?</label>'+
           pillsHTML('ts_tracking', ['Outil dédié (Toggl, Harvest...)','Module dans logiciel compta','Excel','Estimation de mémoire','Pas de suivi'], false, false)+
+          '<div class="branch" data-show-if="ts_tracking" data-show-values=\'["Outil dédié (Toggl, Harvest...)"]\'>' +
+            '<div class="branch-label">→ Précisez</div>'+
+            '<label class="label">Quel outil utilisez-vous exactement ?</label>'+
+            '<input type="text" class="input" data-k="ts_tool_name" placeholder="Ex. Toggl, Harvest, Clockify, Timesheets...">'+
+          '</div>'+
         '</div>'+
         '<div class="q"><label class="label">Modèle de facturation</label>'+
           pillsHTML('ts_billing', ['Forfait','À l\'heure','Tranches de 15 min','Tranches de 30 min','Mix selon mandat','Autre'], false, true)+
@@ -575,6 +579,18 @@
     }
   ];
 
+  var SECTION_PREFIXES = [null,'1','2','3','4','5','6','6 bis','7','8','9','10'];
+
+  function numberQuestions(idx){
+    var prefix = SECTION_PREFIXES[idx];
+    if (!prefix) return;
+    var counter = 0;
+    document.querySelectorAll('.q > .label').forEach(function(lbl){
+      counter++;
+      lbl.textContent = prefix + '.' + counter + ' · ' + lbl.textContent;
+    });
+  }
+
   function renderSection(){
     var s = sections[state.currentSection];
     document.getElementById('content').innerHTML = '<h2 class="section-title">'+s.title+'</h2><p class="section-sub">'+s.sub+'</p>'+s.render();
@@ -585,6 +601,7 @@
     nextBtn.innerHTML = (state.currentSection === sections.length-1) ? 'Terminer ✓' : 'Suivant <span class="arrow">→</span>';
     nextBtn.disabled = false;
     hydrate();
+    numberQuestions(state.currentSection);
     window.scrollTo({top:0, behavior:'smooth'});
   }
 
@@ -700,10 +717,14 @@
         items.forEach(function(it){ if (savedOrder.indexOf(it.dataset.rankV) === -1) canauxList.appendChild(it); });
         renumberCanaux();
       }
-      setupDragAndDrop(canauxList, function(){
-        var order = Array.from(canauxList.children).map(function(it){ return it.dataset.rankV; });
-        set('doc_canaux_order', order);
-        renumberCanaux();
+      new Sortable(canauxList, {
+        animation: 150,
+        handle: '.handle',
+        onEnd: function(){
+          var order = Array.from(canauxList.children).map(function(it){ return it.dataset.rankV; });
+          set('doc_canaux_order', order);
+          renumberCanaux();
+        }
       });
     }
 
@@ -719,30 +740,18 @@
         pItems.forEach(function(it){ if (savedPrio.indexOf(it.dataset.rankV) === -1) prioList.appendChild(it); });
         renumberPrio();
       }
-      setupDragAndDrop(prioList, function(){
-        var order = Array.from(prioList.children).map(function(it){ return it.dataset.rankV; });
-        set('prio_ranking', order);
-        renumberPrio();
+      new Sortable(prioList, {
+        animation: 150,
+        handle: '.prio-rank-handle',
+        onEnd: function(){
+          var order = Array.from(prioList.children).map(function(it){ return it.dataset.rankV; });
+          set('prio_ranking', order);
+          renumberPrio();
+        }
       });
     }
 
     updateBranching();
-  }
-
-  function setupDragAndDrop(list, onChange){
-    var dragged = null;
-    list.querySelectorAll('[draggable="true"]').forEach(function(item){
-      item.addEventListener('dragstart', function(e){ dragged = item; item.classList.add('dragging'); e.dataTransfer.effectAllowed = 'move'; });
-      item.addEventListener('dragend', function(){ item.classList.remove('dragging'); dragged = null; if (onChange) onChange(); });
-      item.addEventListener('dragover', function(e){
-        e.preventDefault();
-        if (!dragged || dragged === item) return;
-        var rect = item.getBoundingClientRect();
-        var after = (e.clientY - rect.top) > rect.height/2;
-        list.insertBefore(dragged, after ? item.nextSibling : item);
-        if (onChange) onChange();
-      });
-    });
   }
 
   function renumberCanaux(){
@@ -886,7 +895,6 @@
     md += '- **Champs pénibles** : '+withOther('inv_painful_fields')+'\n';
     md += '- **Temps par facture** : '+v('inv_time')+'\n';
     md += '- **Destination après traitement** : '+withOther('inv_destination')+'\n';
-    md += "- **Préférence d'intégration** : "+v('inv_integration_pref')+'\n\n';
     md += '**Process actuel détaillé** :\n'+v('inv_process')+'\n\n';
     md += '**Champs critiques** :\n'+v('inv_critical_fields')+'\n\n';
 
@@ -909,7 +917,7 @@
     md += '**Aspect commercial à transformer en priorité** :\n'+v('acq_magic_wand')+'\n\n';
 
     md += '## 8 · Temps passé et facturation interne\n\n';
-    md += '- **Suivi du temps** : '+v('ts_tracking')+'\n';
+    md += '- **Suivi du temps** : '+v('ts_tracking')+(a.ts_tool_name ? ' — '+a.ts_tool_name : '')+'\n';
     md += '- **Modèle de facturation** : '+withOther('ts_billing')+'\n';
     md += '- **% temps non refacturé (perte)** : '+pct('ts_unbilled_pct')+'\n\n';
 
